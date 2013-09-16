@@ -50,8 +50,6 @@ todo: $(PROC_EXE)
 borrar:
 	rm -f *.o
 	rm -f *.lis
-	rm -f afLeerFeedersDeBD.c
-	rm -f afObtenerIdEntorno.c
 	rm -f $(PROC_EXE)
 
 $(PROC_EXE): $(OBJS)
