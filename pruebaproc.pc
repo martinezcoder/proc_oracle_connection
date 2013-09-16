@@ -78,11 +78,7 @@ int bd_connect(void)
   EXEC SQL CONNECT :usuario IDENTIFIED BY :clave 
      AT DB_NAME USING :baseDatos;
 
-
-  if (sqlca.sqlcode == 0)
-  	return 0;
-  else 
-  	return sqlca.sqlcode;
+  return sqlca.sqlcode;
 }
 
 
