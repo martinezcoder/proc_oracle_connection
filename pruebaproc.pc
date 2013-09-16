@@ -1,0 +1,111 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+EXEC SQL INCLUDE SQLCA;
+EXEC SQL INCLUDE ORACA;
+EXEC SQL WHENEVER SQLERROR CONTINUE;
+
+EXEC SQL BEGIN DECLARE SECTION;		
+	  short	BufferI;
+	varchar Buffer[1024];
+	VARCHAR usuario[15+1];
+	VARCHAR clave[15+1];
+	VARCHAR baseDatos[20+1];
+EXEC SQL END DECLARE SECTION;
+
+void sql_error (char *msg);
+int bd_connect(void);
+int bd_disconnect(void);
+int ini(void);
+
+
+void sql_error (char *msg)
+{
+	printf("%s\n", msg); 
+	printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+}
+
+/*
+EXEC SQL WHENEVER SQLERROR DO sql_error ("Oracle Error");
+*/
+
+int ini(void)
+{
+  EXEC SQL SELECT 'Oracle Connection test' INTO :Buffer FROM DUAL;
+  
+  if (sqlca.sqlcode != 0)
+  { 
+  	sql_error ("Oracle Error");
+  	return 0;
+  }
+  else
+  {
+    printf("%s\n", Buffer);
+    return 1;
+  }
+}
+
+int bd_disconnect(void)
+{
+	int connection=0;
+	EXEC SQL ROLLBACK RELEASE;
+	return connection;
+}
+
+
+int bd_connect(void)
+{
+  
+  /* declare needed host variables */
+  char  cUsuario[15]  = "oracle_user"; 
+  char  cPassword[15]  = "oracle_pass";
+  char  cDb_string[20] = "database"; 
+
+  strcpy((char *)usuario.arr, cUsuario);
+  usuario.len=strlen(cUsuario);
+
+  strcpy((char *)clave.arr, cPassword);
+  clave.len=strlen(cPassword);
+
+  strcpy((char *)baseDatos.arr, cDb_string);
+  baseDatos.len=strlen(cDb_string);
+    
+  /* give the database connection a unique name */ 
+  EXEC SQL DECLARE DB_NAME DATABASE; 
+
+  /* connect to the nondefault database  */
+  EXEC SQL CONNECT :usuario IDENTIFIED BY :clave 
+     AT DB_NAME USING :baseDatos;
+
+
+  if (sqlca.sqlcode == 0)
+  	return 0;
+  else 
+  	return sqlca.sqlcode;
+}
+
+
+void main(int argc, char *argv[])
+{ 
+	int connected=0;
+	int ret=0;
+	
+	connected= bd_connect();
+
+	if(connected==0)
+	{
+		printf("Connected!\n");
+/*
+		if (ini())
+				EXEC SQL COMMIT;
+*/
+	}
+	else
+	{
+	  printf("%s\n", sqlca.sqlcode);
+	  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+	}
+
+	bd_disconnect();
+}
